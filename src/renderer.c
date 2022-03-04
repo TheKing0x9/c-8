@@ -12,7 +12,7 @@ void ren_init(renderer* ren, unsigned int scale) {
 }
 
 void ren_clear(renderer* ren) {
-  memset(ren->display, 0, ROWS * COLS);
+  memset(ren->display, 0, sizeof(ren->display));
 }
 
 int ren_set_pixel(renderer* ren, unsigned int x, unsigned int y) {
