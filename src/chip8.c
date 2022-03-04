@@ -1,9 +1,11 @@
 #include <renderer.h>
+#include <keyboard.h>
 #include <chip8.h>
 
 #include <raylib.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #define n(opcode) (opcode & 0xF)
 #define nn(opcode) (opcode & 0xFF)
@@ -94,14 +96,72 @@ void chip8_cycle(chip8* chip, unsigned short speed) {
         chip->stack[++chip->stack_pointer & 0xF] = chip->pc;
         chip->pc = nnn(opcode);
         break;
+      case 0x3000 :
+        if (chip->v[x] == nn(opcode)) chip->pc += 2;
+        break;
+      case 0x4000 :
+        if (chip->v[x] != nn(opcode)) chip->pc += 2;
+        break;
+      case 0x5000 :
+        if (chip->v[x] == chip->v[y]) chip->pc += 2;
+        break;
       case 0x6000 :
         chip->v[x] = nn(opcode);
         break;
       case 0x7000 :
         chip->v[x] += nn(opcode);
         break;
+      case 0x8000 :
+        switch(n(opcode)) {
+          case 0x0: ;
+            chip->v[x] = chip->v[y];
+            break;
+          case 0x1:
+            chip->v[x] |= chip->v[y];
+            break;
+          case 0x2:
+            chip->v[x] &= chip->v[y];
+            break;
+          case 0x3:
+            chip->v[x] ^= chip->v[y];
+            break;
+          case 0x4: ;
+            unsigned short sum = chip->v[x] + chip->v[y];
+            chip->v[0xF] = (sum > 0xFF);
+            chip->v[x] += chip->v[y];
+            break;
+          case 0x5:
+            chip->v[0xF] = chip->v[x] > chip->v[y];
+            chip->v[x] -= chip->v[y];
+            break;
+          case 0x6:
+            chip->v[0xF] = chip->v[x] & 0x1;
+            chip->v[x] >>= 1;
+            break;
+          case 0x7:
+            chip->v[0xF] = chip->v[y] > chip->v[x];
+            chip->v[x] = chip->v[y] - chip->v[x];
+            break;
+          case 0xE:
+            chip->v[0xF] = chip->v[x] & 0x80;
+            chip->v[x] <<= 1;
+            break;
+          default:
+            printf("Unknown opcode %04x\n", opcode);
+        }
+        break;
+      case 0x9000 :
+        if (chip->v[x] != chip->v[y]) chip->pc += 2;
+        break;
       case 0xA000 :
         chip->i = nnn(opcode);
+        break;
+      case 0xB000 :
+        chip->pc = nnn(opcode) + chip->v[0];
+        break;
+      case 0xC000 : ;
+        unsigned short random = rand() * 0xFF;
+        chip->v[x] = random & nn(opcode);
         break;
       case 0xD000 : ;
         unsigned short width = 8;
@@ -121,7 +181,53 @@ void chip8_cycle(chip8* chip, unsigned short speed) {
           }
         }
         break;
-
+      case 0xE000 :
+        switch (nn(opcode)) {
+          case 0x9E :
+            if (is_key_pressed(chip->v[x])) chip->pc += 2;
+            break;
+          case 0xA1 :
+            if (!is_key_pressed(chip->v[x])) chip->pc += 2;
+            break;
+        }
+        break;
+      case 0xF000 :
+        switch(nn(opcode)) {
+          case 0x07:
+            chip->v[x] = chip->delay_timer;
+            break;
+          case 0x0A:
+            if (!any_key_pressed()) chip->pc -= 2;
+            break;
+          case 0x15:
+            chip->delay_timer = chip->v[x];
+            break;
+          case 0x18:
+            chip->sound_timer = chip->v[x];
+            break;
+          case 0x1E:
+            chip->i += chip->v[x];
+            break;
+          case 0x29:
+            chip->i = chip->v[x] * 5;
+            break;
+          case 0x33:
+            chip->memory[chip->i] = chip->v[x] / 100;
+            chip->memory[chip->i + 1] = (chip->v[x] / 10) % 10;
+            chip->memory[chip->i + 2] = chip->v[x] % 10;
+            break;
+          case 0x55:
+            for (unsigned short i = 0; i <= x; i++)
+              chip->memory[chip->i + i] = chip->v[i];
+            break;
+          case 0x65:
+            for (unsigned short i = 0; i <= x; i++)
+              chip->v[i] = chip->memory[chip->i + i];
+            break;
+        }
+        break;
+      default :
+        printf("Unknown opcode %04x\n", opcode); getchar();
     }
   }
 }
