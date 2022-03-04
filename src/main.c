@@ -1,4 +1,5 @@
 #include <raylib.h>
+#include <stdio.h>
 
 #include <chip8.h>
 
