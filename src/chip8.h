@@ -23,7 +23,7 @@
   void chip8_init(chip8*);
   void chip8_render(chip8*);
   void chip8_update_timers(chip8*);
-  void chip8_cycle(chip8*, unsigned short);
 
   int chip8_loadrom(chip8*, char*);
+  unsigned short chip8_cycle(chip8*, unsigned short);
 #endif

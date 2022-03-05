@@ -43,6 +43,7 @@ void chip8_init(chip8* chip) {
   memset(chip->v, 0, sizeof(chip->v));
 
   ren_init(&chip->ren, 10);
+  ren_clear(&chip->ren);
 }
 
 int chip8_loadrom(chip8* chip, char* path) {
@@ -70,9 +71,10 @@ void chip8_render(chip8* chip) {
   ren_render(&chip->ren);
 }
 
-void chip8_cycle(chip8* chip, unsigned short speed) {
+unsigned short chip8_cycle(chip8* chip, unsigned short speed) {
+  unsigned short opcode = 0;
   for (int i = 0; i < speed; i++) {
-    unsigned short opcode = chip->memory[chip->pc] << 8 | chip->memory[chip->pc + 1];
+    opcode = chip->memory[chip->pc] << 8 | chip->memory[chip->pc + 1];
     unsigned char x = (opcode & 0x0F00) >> 8;
     unsigned char y = (opcode & 0x00F0) >> 4;
 
@@ -230,4 +232,5 @@ void chip8_cycle(chip8* chip, unsigned short speed) {
         printf("Unknown opcode %04x\n", opcode); getchar();
     }
   }
+  return opcode;
 }
