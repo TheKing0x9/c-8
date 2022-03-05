@@ -31,6 +31,6 @@ void ren_render(renderer* ren) {
   for (int i = 0; i < ren->columns; i++)
     for (int j = 0; j < ren->rows; j++)
       if (ren->display[i + j * ren->columns])
-        DrawRectangle(i * ren->scale, j * ren->scale, ren->scale, ren->scale,
+        DrawRectangle(i * ren->scale, j * ren->scale + 25, ren->scale, ren->scale,
                       (Color){ 198, 43, 105, 255 });
 }

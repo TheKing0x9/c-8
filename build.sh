@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cflags="-Wall -O3 -g -std=gnu11 -fno-strict-aliasing -Isrc"
+cflags="-Wall -Wno-unused-result -O3 -g -std=gnu11 -fno-strict-aliasing -Isrc"
 lflags="-lraylib -lm -lGL -lpthread -ldl -lrt -lX11"
 
 platform="unix"

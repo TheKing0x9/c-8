@@ -2,10 +2,10 @@
 #include <raylib.h>
 
 static unsigned int keymap[0x10] = {
-  88, 49, 50, 51,
-  81, 87, 69, 65,
-  83, 68, 90, 67,
-  52, 82, 70, 86,
+  49, 50, 51, 52,
+  81, 87, 69, 82,
+  65, 83, 68, 70,
+  90, 88, 67, 86,
 };
 
 unsigned char is_key_pressed(unsigned char keycode) {
