@@ -13,6 +13,9 @@
     unsigned int height;
 
     unsigned char display[ROWS * COLS];
+    
+    unsigned int offsetX;
+    unsigned int offsetY;
   };
   typedef struct renderer renderer;
 

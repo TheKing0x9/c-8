@@ -3,6 +3,8 @@
 #include <raylib.h>
 #include <string.h>
 
+#include <lib/raygui.h>
+
 void ren_init(renderer* ren, unsigned int scale) {
   ren->scale = scale;
   ren->columns = COLS;
@@ -28,9 +30,10 @@ int ren_set_pixel(renderer* ren, unsigned int x, unsigned int y) {
 }
 
 void ren_render(renderer* ren) {
+  DrawRectangleLinesEx((Rectangle){ ren->offsetX, ren->offsetY, ren->width, ren->height }, 3, GetColor(GuiGetStyle(DEFAULT, BORDER_COLOR_NORMAL)));
   for (int i = 0; i < ren->columns; i++)
     for (int j = 0; j < ren->rows; j++)
       if (ren->display[i + j * ren->columns])
-        DrawRectangle(i * ren->scale, j * ren->scale + 25, ren->scale, ren->scale,
-                      (Color){ 198, 43, 105, 255 });
+        DrawRectangle(ren->offsetX + i * ren->scale, ren->offsetY + j * ren->scale, ren->scale, ren->scale,
+                      GetColor(GuiGetStyle(DEFAULT, LINE_COLOR)));
 }

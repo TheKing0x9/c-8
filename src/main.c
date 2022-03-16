@@ -31,24 +31,35 @@ int main(int argc, char** argv) {
   }
 
   SetTraceLogLevel(LOG_ERROR);
-  InitWindow(chip.ren.width, chip.ren.height + 50, "Chip8-Emulator");
+  InitWindow(chip.ren.width*2, chip.ren.height*2, "Chip8-Emulator");
   SetTargetFPS(60);
+  
+  chip.ren.offsetX = GetScreenWidth() * 0.5 - chip.ren.width * 0.5;
+  chip.ren.offsetY = 25;
 
   while(!WindowShouldClose()) {
+    /* Handle file drop */
     if (IsFileDropped())
     {
       int dropFileCount = 0;
       char **droppedFiles = GetDroppedFiles(&dropFileCount);
 
-      if ((dropFileCount > 0) && IsFileExtension(droppedFiles[0], ".ch8")) {
-        printf("Loading ROM %s\n", droppedFiles[0]);
-        chip8_init(&chip);
-        if (!chip8_loadrom(&chip, droppedFiles[0])){
-          printf("The ROM could not be loaded ... \n");
-          return 1;
+      if ((dropFileCount > 0)) {
+        if (IsFileExtension(droppedFiles[0], ".ch8")) {
+          printf("Loading ROM %s\n", droppedFiles[0]);
+          chip8_init(&chip);
+          if (!chip8_loadrom(&chip, droppedFiles[0])){
+            printf("The ROM could not be loaded ... \n");
+            return 1;
+          } else {
+            cycle = true;
+          }
+        }
+        else if (IsFileExtension(droppedFiles[0], ".rgs")) {
+          GuiLoadStyle(droppedFiles[0]);
         }
       }
-      ClearDroppedFiles();    // Clear internal buffers
+      ClearDroppedFiles();
     }
 
     if (cycle) {
@@ -59,15 +70,15 @@ int main(int argc, char** argv) {
     }
 
     BeginDrawing();
-    ClearBackground(BLACK);
+    ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
     chip8_render(&chip);
-    // spped controls
+    /* speed controls */
     GuiLabel((Rectangle) { 0, 0, 50, 25}, "  Speed");
     if (GuiDropdownBox((Rectangle){ 50, 0, 125, 25 }, "8 Cycles/Frame;10 Cycles/Frame;12 Cycles/Frame;16 Cycles/Frame; 20 Cycles/Frame", &selected_speed, speed_dropdown_enabled)){
       speed = available_speeds[selected_speed];
       speed_dropdown_enabled = !speed_dropdown_enabled;
     }
-    // player controls
+    /* player controls */
     if (GuiButton((Rectangle){ GetScreenWidth() / 2 - 12.5, 0, 25, 25 }, GuiIconText(cycle ? RAYGUI_ICON_PLAYER_PAUSE : RAYGUI_ICON_PLAYER_PLAY, ""))) cycle = !cycle;
     if (!cycle) {
       if (GuiButton((Rectangle){ GetScreenWidth() / 2 + 25, 0, 25, 25 }, GuiIconText(RAYGUI_ICON_PLAYER_NEXT, ""))) {
@@ -75,7 +86,7 @@ int main(int argc, char** argv) {
         chip8_update_timers(&chip);
       }
     }
-    sprintf(status_text, "Executing instruction %04x at 0x%04x; I = %04x; Stack Pointer = %d", opcode, chip.pc, chip.i, chip.stack_pointer);
+    sprintf(status_text, "Executing instruction %04x at 0x%04x; I = %04x; Stack Pointer = %x", opcode, chip.pc, chip.i, chip.stack_pointer);
     GuiStatusBar((Rectangle){ 0, GetScreenHeight() - 25, GetScreenWidth(), 25 }, status_text);
     EndDrawing();
 
