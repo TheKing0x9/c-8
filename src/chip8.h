@@ -25,5 +25,5 @@
   void chip8_update_timers(chip8*);
 
   int chip8_loadrom(chip8*, char*);
-  unsigned short chip8_cycle(chip8*, unsigned short);
+  unsigned short chip8_cycle(chip8*);
 #endif

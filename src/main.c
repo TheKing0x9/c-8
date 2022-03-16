@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
       printf("The ROM could not be loaded ... \n");
       return 1;
     } else {
-    cycle = true;
+      cycle = true;
     }
   }
 
@@ -52,8 +52,10 @@ int main(int argc, char** argv) {
     }
 
     if (cycle) {
-      opcode = chip8_cycle(&chip, speed);
-      chip8_update_timers(&chip);
+      for (int i = 0; i < speed; i++) {
+        opcode = chip8_cycle(&chip);
+        chip8_update_timers(&chip);
+      }
     }
 
     BeginDrawing();
@@ -69,7 +71,7 @@ int main(int argc, char** argv) {
     if (GuiButton((Rectangle){ GetScreenWidth() / 2 - 12.5, 0, 25, 25 }, GuiIconText(cycle ? RAYGUI_ICON_PLAYER_PAUSE : RAYGUI_ICON_PLAYER_PLAY, ""))) cycle = !cycle;
     if (!cycle) {
       if (GuiButton((Rectangle){ GetScreenWidth() / 2 + 25, 0, 25, 25 }, GuiIconText(RAYGUI_ICON_PLAYER_NEXT, ""))) {
-        opcode = chip8_cycle(&chip, 1);
+        opcode = chip8_cycle(&chip);
         chip8_update_timers(&chip);
       }
     }
