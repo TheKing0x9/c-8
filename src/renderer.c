@@ -30,7 +30,7 @@ int ren_set_pixel(renderer* ren, unsigned int x, unsigned int y) {
 }
 
 void ren_render(renderer* ren) {
-  DrawRectangleLinesEx((Rectangle){ ren->offsetX, ren->offsetY, ren->width, ren->height }, 3, GetColor(GuiGetStyle(DEFAULT, BORDER_COLOR_NORMAL)));
+  DrawRectangleLinesEx((Rectangle){ ren->offsetX, ren->offsetY, ren->width, ren->height }, 1, GetColor(GuiGetStyle(DEFAULT, BORDER_COLOR_NORMAL)));
   for (int i = 0; i < ren->columns; i++)
     for (int j = 0; j < ren->rows; j++)
       if (ren->display[i + j * ren->columns])
