@@ -18,6 +18,8 @@ void chip8_init(chip8* chip) {
   chip->sound_timer = 0;
   chip->delay_timer = 0;
 
+  chip->settings.shift_ignore_vy = 1;
+
   const unsigned char chip8_fontset[0x50] =
   {
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -119,12 +121,15 @@ unsigned short chip8_cycle(chip8* chip) {
           break;
         case 0x1:
           chip->v[x] |= chip->v[y];
+          if(chip->settings.clear_vf) chip->v[0xF] = 0;
           break;
         case 0x2:
           chip->v[x] &= chip->v[y];
+          if(chip->settings.clear_vf) chip->v[0xF] = 0;
           break;
         case 0x3:
           chip->v[x] ^= chip->v[y];
+          if(chip->settings.clear_vf) chip->v[0xF] = 0;
           break;
         case 0x4: ;
           unsigned short sum = chip->v[x] + chip->v[y];
@@ -136,6 +141,7 @@ unsigned short chip8_cycle(chip8* chip) {
           chip->v[x] -= chip->v[y];
           break;
         case 0x6:
+          if(!chip->settings.shift_ignore_vy) chip->v[x] = chip->v[y];
           chip->v[0xF] = chip->v[x] & 0x1;
           chip->v[x] >>= 1;
           break;
@@ -144,6 +150,7 @@ unsigned short chip8_cycle(chip8* chip) {
           chip->v[x] = chip->v[y] - chip->v[x];
           break;
         case 0xE:
+          if(!chip->settings.shift_ignore_vy) chip->v[x] = chip->v[y];
           chip->v[0xF] = chip->v[x] & 0x80;
           chip->v[x] <<= 1;
           break;
@@ -158,7 +165,7 @@ unsigned short chip8_cycle(chip8* chip) {
       chip->i = nnn(opcode);
       break;
     case 0xB000 :
-      chip->pc = nnn(opcode) + chip->v[0];
+      chip->pc = nnn(opcode) + (chip->settings.jump_with_offset ? chip->v[x] : chip->v[0]);
       break;
     case 0xC000 : ;
       unsigned short random = rand() * 0xFF;
@@ -220,10 +227,12 @@ unsigned short chip8_cycle(chip8* chip) {
         case 0x55:
           for (unsigned short i = 0; i <= x; i++)
             chip->memory[chip->i + i] = chip->v[i];
+          if (chip->settings.load_changes_i) chip->i += x + 1;
           break;
         case 0x65:
           for (unsigned short i = 0; i <= x; i++)
             chip->v[i] = chip->memory[chip->i + i];
+          if (chip->settings.load_changes_i) chip->i += x + 1;
           break;
       }
       break;
