@@ -2757,7 +2757,7 @@ int GuiListViewEx(Rectangle bounds, const char **text, int count, int *focus, in
     if (visibleItems > count) visibleItems = count;
 
     int startIndex = (scrollIndex == NULL)? 0 : *scrollIndex;
-    if ((startIndex < 0) || (startIndex > (count - visibleItems))) startIndex = 0;
+    if ((startIndex < 0) || (startIndex > (count - visibleItems))) startIndex = count - visibleItems;
     int endIndex = startIndex + visibleItems;
 
     // Update control
@@ -3857,7 +3857,7 @@ static const char *GetTextIcon(const char *text, int *iconId)
 static void GuiDrawText(const char *text, Rectangle bounds, int alignment, Color tint)
 {
     #define TEXT_VALIGN_PIXEL_OFFSET(h)  ((int)h%2)     // Vertical alignment for pixel perfect
-    
+
     #if !defined(RAYGUI_ICON_TEXT_PADDING)
         #define RAYGUI_ICON_TEXT_PADDING   4
     #endif
@@ -3869,7 +3869,7 @@ static void GuiDrawText(const char *text, Rectangle bounds, int alignment, Color
 
         // Get text position depending on alignment and iconId
         //---------------------------------------------------------------------------------
-        
+
 
         Vector2 position = { bounds.x, bounds.y };
 
@@ -4200,7 +4200,7 @@ const char **TextSplit(const char *text, char delimiter, int *count)
     // all used memory is static... it has some limitations:
     //      1. Maximum number of possible split strings is set by RAYGUI_TEXTSPLIT_MAX_ELEMENTS
     //      2. Maximum size of text to split is RAYGUI_TEXTSPLIT_MAX_TEXT_SIZE
-    
+
     #if !defined(RAYGUI_TEXTSPLIT_MAX_ELEMENTS)
         #define RAYGUI_TEXTSPLIT_MAX_ELEMENTS        128
     #endif

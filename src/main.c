@@ -10,6 +10,17 @@ static unsigned short available_speeds[0x5] = {
   8, 10, 12, 16, 20
 };
 
+static char** set_cpu_data(chip8* chip) {
+  static char buffer[4096][12] = { 0 };
+  static char *result[4096] = { 0 };
+
+  for (unsigned short i = 0; i < 4096; i++) {
+    sprintf(buffer[i], "%04d : %04x", i, chip->memory[i]);
+    result[i] = buffer[i];
+  }
+  return result;
+}
+
 typedef struct {
   int scroll_index;
   int active;
@@ -24,16 +35,17 @@ int main(int argc, char** argv) {
   bool cycle = false;
   bool follow_cpu = false;
 
-  unsigned short pc = 0;
+  unsigned short pc = 0x200;
   unsigned short speed = available_speeds[selected_speed];
   unsigned short opcode = 0;
 
   char status_text[100] = { 0 };
   char register_data[145] = { 0 };
+  char** cpu_data = NULL;
 
-  list_view registers = { 0xA, -1 };
+  list_view registers = { 0xE, -1 };
   list_view stack = { 0, 2 };
-  list_view cpu = { 0, -1 };
+  list_view cpu = { 0x0, 0x0 };
 
   chip8_init(&chip);
   if (argc > 1) {
@@ -42,6 +54,7 @@ int main(int argc, char** argv) {
       return 1;
     } else {
       cycle = true;
+      cpu_data = set_cpu_data(&chip);
     }
   }
 
@@ -68,6 +81,7 @@ int main(int argc, char** argv) {
             return 1;
           } else {
             cycle = true;
+            cpu_data = set_cpu_data(&chip);
           }
         }
         else if (IsFileExtension(droppedFiles[0], ".rgs")) {
@@ -117,8 +131,13 @@ int main(int argc, char** argv) {
     GuiGroupBox((Rectangle){ chip.ren.offsetX + chip.ren.width / 2, chip.ren.offsetY + chip.ren.height + 16, chip.ren.width / 2, chip.ren.height }, "Stack");
     stack.active = GuiListView((Rectangle){ chip.ren.offsetX  + chip.ren.width / 2 + 2, chip.ren.offsetY + chip.ren.height + 20, chip.ren.width / 2 - 2, 224+32 }, register_data, &stack.scroll_index, stack.active);
     /* CPU visualizer */
-    GuiGroupBox((Rectangle){ 0, chip.ren.offsetY, chip.ren.width / 2, chip.ren.height * 2 - chip.ren.offsetY * 2}, "C.P.U.");
+    //cpu.active = pc;
     follow_cpu = GuiCheckBox((Rectangle){ 10, chip.ren.offsetY + 10, 15, 15 }, "Follow CPU", follow_cpu);
+    cpu.active = pc;
+    if (follow_cpu) cpu.scroll_index = pc;
+    GuiGroupBox((Rectangle){ 0, chip.ren.offsetY, chip.ren.width / 2, chip.ren.height * 2 - chip.ren.offsetY * 2}, "C.P.U.");
+    cpu.active = GuiListViewEx((Rectangle){ 2, chip.ren.offsetY + 32, chip.ren.width / 2 - 2, chip.ren.height * 2 - 108 }, cpu_data, 4096, NULL, &cpu.scroll_index, cpu.active);
+    printf("%d\n", cpu.active);
     /* Settings */
     GuiGroupBox((Rectangle){ chip.ren.width * 1.5, chip.ren.offsetY, chip.ren.width / 2, chip.ren.height * 2 - chip.ren.offsetY * 2}, "Settings");
     chip.settings.shift_ignore_vy = GuiCheckBox((Rectangle){ chip.ren.width * 1.5 + 10, chip.ren.offsetY + 10, 15, 15 }, "Shift modifies vX in place and ignores vY.", chip.settings.shift_ignore_vy);

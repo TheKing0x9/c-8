@@ -40,7 +40,7 @@ local function build_and_run()
   console.run({
     command = "./build.sh",
     on_complete = function()
-        console.run({ command = "./chip8 roms/BLITZ" })
+        console.run({ command = "./chip8 roms/BLINKY" })
     end
   })
 end
