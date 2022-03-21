@@ -11,7 +11,7 @@
 #define nn(opcode) (opcode & 0xFF)
 #define nnn(opcode) (opcode & 0xFFF)
 
-void chip8_init(chip8* chip) {
+void chip8_init(chip8* chip, unsigned short scale) {
   chip->i = 0;
   chip->pc = 0x200;
 
@@ -44,7 +44,7 @@ void chip8_init(chip8* chip) {
   memset(chip->stack, 0, sizeof(chip->stack));
   memset(chip->v, 0, sizeof(chip->v));
 
-  ren_init(&chip->ren, 10);
+  ren_init(&chip->ren, scale);
   ren_clear(&chip->ren);
 }
 

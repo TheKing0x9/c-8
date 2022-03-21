@@ -30,7 +30,7 @@
   };
   typedef struct chip8 chip8;
 
-  void chip8_init(chip8*);
+  void chip8_init(chip8*, unsigned short);
   void chip8_render(chip8*);
   void chip8_update_timers(chip8*);
 
