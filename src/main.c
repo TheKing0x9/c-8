@@ -34,6 +34,8 @@ int main(int argc, char** argv) {
   bool speed_dropdown_enabled = false;
   bool cycle = false;
   bool follow_cpu = false;
+  bool quit = false;
+  bool show_quit_window = false;
 
   unsigned short pc = 0x200;
   unsigned short speed = available_speeds[selected_speed];
@@ -61,11 +63,15 @@ int main(int argc, char** argv) {
   SetTraceLogLevel(LOG_ERROR);
   InitWindow(chip.ren.width*2, chip.ren.height*2, "Chip8-Emulator");
   SetTargetFPS(60);
+  SetExitKey(0);
 
   chip.ren.offsetX = GetScreenWidth() * 0.5 - chip.ren.width * 0.5;
   chip.ren.offsetY = 32;
 
-  while(!WindowShouldClose()) {
+  while(!quit) {
+    quit = WindowShouldClose();
+
+    if (IsKeyPressed(KEY_ESCAPE)) show_quit_window = !show_quit_window;
     /* Handle file drop */
     if (IsFileDropped())
     {
@@ -154,6 +160,14 @@ int main(int argc, char** argv) {
     /* status bar */
     sprintf(status_text, "Executing instruction %04x at 0x%04x; I = %04x; Stack Pointer = %x", opcode, pc, chip.i, chip.stack_pointer);
     GuiStatusBar((Rectangle){ 0, GetScreenHeight() - 32, GetScreenWidth(), 32 }, status_text);
+
+    if (show_quit_window) {
+      DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(RAYWHITE, 0.8f));
+      int result = GuiMessageBox((Rectangle){ GetScreenWidth()/2 - 125, GetScreenHeight()/2 - 50, 250, 100 }, GuiIconText(RAYGUI_ICON_EXIT, "Close Window"), "Do you really want to exit?", "Yes;No");
+
+      if ((result == 0) || (result == 2)) show_quit_window = false;
+      else if (result == 1) quit = true;
+    }
     EndDrawing();
 
     fflush(stdout);
